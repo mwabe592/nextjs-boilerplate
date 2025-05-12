@@ -2,22 +2,18 @@
 import { motion } from "framer-motion";
 import Image from "next/image";
 import Link from "next/link";
-import { useState } from "react";
+import { useActionState } from "react";
+import { signInWithGoogle, signUp, type AuthState } from "@/app/auth/actions";
 
 const Signup = () => {
-  const [data, setData] = useState({
-    firstName: "",
-    lastName: "",
-    email: "",
-    password: "",
-  });
+  const [state, action, isPending] = useActionState(signUp, null);
 
   return (
     <>
       {/* <!-- ===== SignUp Form Start ===== --> */}
-      <section className="pb-12.5 pt-32.5 lg:pb-25 lg:pt-45 xl:pb-30 xl:pt-50">
-        <div className="relative z-1 mx-auto max-w-c-1016 px-7.5 pb-7.5 pt-10 lg:px-15 lg:pt-15 xl:px-20 xl:pt-20">
-          <div className="absolute left-0 top-0 -z-1 h-2/3 w-full rounded-lg bg-linear-to-t from-transparent to-[#dee7ff47] dark:bg-linear-to-t dark:to-[#252A42]"></div>
+      <section className="pt-32.5 pb-12.5 lg:pt-45 lg:pb-25 xl:pt-50 xl:pb-30">
+        <div className="max-w-c-1016 relative z-1 mx-auto px-7.5 pt-10 pb-7.5 lg:px-15 lg:pt-15 xl:px-20 xl:pt-20">
+          <div className="absolute top-0 left-0 -z-1 h-2/3 w-full rounded-lg bg-gradient-to-t from-transparent to-[#dee7ff47] dark:bg-gradient-to-t dark:to-[#252A42]"></div>
           <div className="absolute bottom-17.5 left-0 -z-1 h-1/3 w-full">
             <Image
               src="/images/shape/shape-dotted-light.svg"
@@ -39,7 +35,6 @@ const Signup = () => {
                 opacity: 0,
                 y: -20,
               },
-
               visible: {
                 opacity: 1,
                 y: 0,
@@ -49,16 +44,24 @@ const Signup = () => {
             whileInView="visible"
             transition={{ duration: 1, delay: 0.1 }}
             viewport={{ once: true }}
-            className="animate_top rounded-lg bg-white px-7.5 pt-7.5 shadow-solid-8 dark:border dark:border-strokedark dark:bg-black xl:px-15 xl:pt-15"
+            className="animate_top shadow-solid-8 dark:border-strokedark rounded-lg bg-white px-7.5 pt-7.5 xl:px-15 xl:pt-15 dark:border dark:bg-black"
           >
-            <h2 className="mb-15 text-center text-3xl font-semibold text-black dark:text-white xl:text-sectiontitle2">
+            <h2 className="xl:text-sectiontitle2 mb-15 text-center text-3xl font-semibold text-black dark:text-white">
               Create an Account
             </h2>
 
+            {state?.error && (
+              <div className="mb-4 rounded-md bg-red-50 p-4 text-red-600">
+                {state.error}
+              </div>
+            )}
+
             <div className="flex items-center gap-8">
               <button
+                onClick={() => signInWithGoogle()}
+                type="button"
                 aria-label="signup with google"
-                className="text-body-color dark:text-body-color-dark dark:shadow-two mb-6 flex w-full items-center justify-center rounded-xs border border-stroke bg-[#f8f8f8] px-6 py-3 text-base outline-hidden transition-all duration-300 hover:border-primary hover:bg-primary/5 hover:text-primary dark:border-transparent dark:bg-[#2C303B] dark:hover:border-primary dark:hover:bg-primary/5 dark:hover:text-primary dark:hover:shadow-none"
+                className="text-body-color dark:text-body-color-dark dark:shadow-two border-stroke hover:border-primary hover:bg-primary/5 hover:text-primary dark:hover:border-primary dark:hover:bg-primary/5 dark:hover:text-primary mb-6 flex w-full items-center justify-center rounded-xs border bg-[#f8f8f8] px-6 py-3 text-base transition-all duration-300 outline-none dark:border-transparent dark:bg-[#2C303B] dark:hover:shadow-none"
               >
                 <span className="mr-3">
                   <svg
@@ -93,58 +96,34 @@ const Signup = () => {
                     </defs>
                   </svg>
                 </span>
-                Signup with Google
-              </button>
-
-              <button
-                aria-label="signup with github"
-                className="text-body-color dark:text-body-color-dark dark:shadow-two mb-6 flex w-full items-center justify-center rounded-xs border border-stroke bg-[#f8f8f8] px-6 py-3 text-base outline-hidden transition-all duration-300 hover:border-primary hover:bg-primary/5 hover:text-primary dark:border-transparent dark:bg-[#2C303B] dark:hover:border-primary dark:hover:bg-primary/5 dark:hover:text-primary dark:hover:shadow-none"
-              >
-                <span className="mr-3">
-                  <svg
-                    fill="currentColor"
-                    width="22"
-                    height="22"
-                    viewBox="0 0 64 64"
-                    xmlns="http://www.w3.org/2000/svg"
-                  >
-                    <path d="M32 1.7998C15 1.7998 1 15.5998 1 32.7998C1 46.3998 9.9 57.9998 22.3 62.1998C23.9 62.4998 24.4 61.4998 24.4 60.7998C24.4 60.0998 24.4 58.0998 24.3 55.3998C15.7 57.3998 13.9 51.1998 13.9 51.1998C12.5 47.6998 10.4 46.6998 10.4 46.6998C7.6 44.6998 10.5 44.6998 10.5 44.6998C13.6 44.7998 15.3 47.8998 15.3 47.8998C18 52.6998 22.6 51.2998 24.3 50.3998C24.6 48.3998 25.4 46.9998 26.3 46.1998C19.5 45.4998 12.2 42.7998 12.2 30.9998C12.2 27.5998 13.5 24.8998 15.4 22.7998C15.1 22.0998 14 18.8998 15.7 14.5998C15.7 14.5998 18.4 13.7998 24.3 17.7998C26.8 17.0998 29.4 16.6998 32.1 16.6998C34.8 16.6998 37.5 16.9998 39.9 17.7998C45.8 13.8998 48.4 14.5998 48.4 14.5998C50.1 18.7998 49.1 22.0998 48.7 22.7998C50.7 24.8998 51.9 27.6998 51.9 30.9998C51.9 42.7998 44.6 45.4998 37.8 46.1998C38.9 47.1998 39.9 49.1998 39.9 51.9998C39.9 56.1998 39.8 59.4998 39.8 60.4998C39.8 61.2998 40.4 62.1998 41.9 61.8998C54.1 57.7998 63 46.2998 63 32.5998C62.9 15.5998 49 1.7998 32 1.7998Z" />
-                  </svg>
-                </span>
-                Signup with Github
+                Sign up with Google
               </button>
             </div>
 
             <div className="mb-10 flex items-center justify-center">
-              <span className="dark:bg-stroke-dark hidden h-[1px] w-full max-w-[200px] bg-stroke dark:bg-strokedark sm:block"></span>
+              <span className="bg-stroke dark:bg-stroke-dark dark:bg-strokedark hidden h-[1px] w-full max-w-[200px] sm:block"></span>
               <p className="text-body-color dark:text-body-color-dark w-full px-5 text-center text-base">
                 Or, register with your email
               </p>
-              <span className="dark:bg-stroke-dark hidden h-[1px] w-full max-w-[200px] bg-stroke dark:bg-strokedark sm:block"></span>
+              <span className="bg-stroke dark:bg-stroke-dark dark:bg-strokedark hidden h-[1px] w-full max-w-[200px] sm:block"></span>
             </div>
 
-            <form>
+            <form action={action}>
               <div className="mb-7.5 flex flex-col gap-7.5 lg:mb-12.5 lg:flex-row lg:justify-between lg:gap-14">
                 <input
                   name="firstName"
                   type="text"
                   placeholder="First name"
-                  value={data.firstName}
-                  onChange={(e) =>
-                    setData({ ...data, [e.target.name]: e.target.value })
-                  }
-                  className="w-full border-b border-stroke bg-transparent pb-3.5 focus:border-waterloo focus:placeholder:text-black focus-visible:outline-hidden dark:border-strokedark dark:focus:border-manatee dark:focus:placeholder:text-white lg:w-1/2"
+                  required
+                  className="border-stroke focus:border-waterloo dark:border-strokedark dark:focus:border-manatee w-full border-b bg-transparent pb-3.5 focus:placeholder:text-black focus-visible:outline-none lg:w-1/2 dark:focus:placeholder:text-white"
                 />
 
                 <input
                   name="lastName"
                   type="text"
                   placeholder="Last name"
-                  value={data.lastName}
-                  onChange={(e) =>
-                    setData({ ...data, [e.target.name]: e.target.value })
-                  }
-                  className="w-full border-b border-stroke bg-transparent pb-3.5 focus:border-waterloo focus:placeholder:text-black focus-visible:outline-hidden dark:border-strokedark dark:focus:border-manatee dark:focus:placeholder:text-white lg:w-1/2"
+                  required
+                  className="border-stroke focus:border-waterloo dark:border-strokedark dark:focus:border-manatee w-full border-b bg-transparent pb-3.5 focus:placeholder:text-black focus-visible:outline-none lg:w-1/2 dark:focus:placeholder:text-white"
                 />
               </div>
 
@@ -153,22 +132,16 @@ const Signup = () => {
                   name="email"
                   type="email"
                   placeholder="Email address"
-                  value={data.email}
-                  onChange={(e) =>
-                    setData({ ...data, [e.target.name]: e.target.value })
-                  }
-                  className="w-full border-b border-stroke bg-transparent pb-3.5 focus:border-waterloo focus:placeholder:text-black focus-visible:outline-hidden dark:border-strokedark dark:focus:border-manatee dark:focus:placeholder:text-white lg:w-1/2"
+                  required
+                  className="border-stroke focus:border-waterloo dark:border-strokedark dark:focus:border-manatee w-full border-b bg-transparent pb-3.5 focus:placeholder:text-black focus-visible:outline-none lg:w-1/2 dark:focus:placeholder:text-white"
                 />
 
                 <input
                   name="password"
                   type="password"
                   placeholder="Password"
-                  value={data.password}
-                  onChange={(e) =>
-                    setData({ ...data, [e.target.name]: e.target.value })
-                  }
-                  className="w-full border-b border-stroke bg-transparent pb-3.5 focus:border-waterloo focus:placeholder:text-black focus-visible:outline-hidden dark:border-strokedark dark:focus:border-manatee dark:focus:placeholder:text-white lg:w-1/2"
+                  required
+                  className="border-stroke focus:border-waterloo dark:border-strokedark dark:focus:border-manatee w-full border-b bg-transparent pb-3.5 focus:placeholder:text-black focus-visible:outline-none lg:w-1/2 dark:focus:placeholder:text-white"
                 />
               </div>
 
@@ -177,11 +150,12 @@ const Signup = () => {
                   <input
                     id="default-checkbox"
                     type="checkbox"
+                    name="remember"
                     className="peer sr-only"
                   />
-                  <span className="border-gray-300 bg-gray-100 text-blue-600 dark:border-gray-600 dark:bg-gray-700 group mt-1 flex h-5 min-w-[20px] items-center justify-center rounded-sm peer-checked:bg-primary">
+                  <span className="group peer-checked:bg-primary mt-1 flex h-5 min-w-[20px] items-center justify-center rounded-sm border-gray-300 bg-gray-100 text-blue-600 dark:border-gray-600 dark:bg-gray-700">
                     <svg
-                      className="opacity-0 in-[.group]:peer-checked:opacity-100"
+                      className="opacity-0 peer-checked:opacity-100"
                       width="10"
                       height="8"
                       viewBox="0 0 10 8"
@@ -198,17 +172,19 @@ const Signup = () => {
                   </span>
                   <label
                     htmlFor="default-checkbox"
-                    className="flex max-w-[425px] cursor-pointer select-none  pl-3"
+                    className="pl-3 select-none"
                   >
                     Keep me signed in
                   </label>
                 </div>
 
                 <button
+                  type="submit"
+                  disabled={isPending}
                   aria-label="signup with email and password"
-                  className="inline-flex items-center gap-2.5 rounded-full bg-black px-6 py-3 font-medium text-white duration-300 ease-in-out hover:bg-blackho dark:bg-btndark dark:hover:bg-blackho"
+                  className="hover:bg-blackho dark:bg-btndark dark:hover:bg-blackho inline-flex items-center gap-2.5 rounded-full bg-black px-6 py-3 font-medium text-white duration-300 ease-in-out disabled:opacity-50"
                 >
-                  Create Account
+                  {isPending ? "Creating Account..." : "Create Account"}
                   <svg
                     className="fill-white"
                     width="14"
@@ -225,11 +201,11 @@ const Signup = () => {
                 </button>
               </div>
 
-              <div className="mt-12.5 border-t border-stroke py-5 text-center dark:border-strokedark">
+              <div className="border-stroke dark:border-strokedark mt-12.5 border-t py-5 text-center">
                 <p>
                   Already have an account?{" "}
                   <Link
-                    className="text-black hover:text-primary dark:text-white dark:hover:text-primary"
+                    className="hover:text-primary dark:hover:text-primary text-black dark:text-white"
                     href="/auth/signin"
                   >
                     Sign In
