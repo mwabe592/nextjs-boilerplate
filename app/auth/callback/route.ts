@@ -1,35 +1,30 @@
-import { createClient } from "@/utils/supabase/server";
-import { cookies } from "next/headers";
 import { NextResponse } from "next/server";
+// The client you created from the Server-Side Auth instructions
+import { createClient } from "@/utils/supabase/server";
 
 export async function GET(request: Request) {
-  console.log("AuthCallback: Processing callback");
-  const requestUrl = new URL(request.url);
-  const code = requestUrl.searchParams.get("code");
-  const next = requestUrl.searchParams.get("next") ?? "/dashboard";
-
-  console.log("next url is:", next);
+  const { searchParams, origin } = new URL(request.url);
+  const code = searchParams.get("code");
+  // if "next" is in param, use it as the redirect URL
+  const next = searchParams.get("next") ?? "/dashboard";
 
   if (code) {
-    console.log("AuthCallback: Exchanging code for session");
-    const cookieStore = cookies();
-    const supabase = await createClient(cookieStore);
+    const supabase = await createClient();
     const { error } = await supabase.auth.exchangeCodeForSession(code);
-
-    if (error) {
-      console.error("AuthCallback: Error:", error);
-      return NextResponse.redirect(
-        new URL("/auth/signin?error=auth-failed", requestUrl.origin),
-      );
+    if (!error) {
+      const forwardedHost = request.headers.get("x-forwarded-host"); // original origin before load balancer
+      const isLocalEnv = process.env.NODE_ENV === "development";
+      if (isLocalEnv) {
+        // we can be sure that there is no load balancer in between, so no need to watch for X-Forwarded-Host
+        return NextResponse.redirect(`${origin}${next}`);
+      } else if (forwardedHost) {
+        return NextResponse.redirect(`https://${forwardedHost}${next}`);
+      } else {
+        return NextResponse.redirect(`${origin}${next}`);
+      }
     }
-
-    // Redirect to the next page if provided, otherwise go to dashboard
-    console.log("AuthCallback: Success, redirecting to:", next);
-    return NextResponse.redirect(new URL(next, requestUrl.origin));
   }
 
-  console.log("AuthCallback: No code present, redirecting to error page");
-  return NextResponse.redirect(
-    new URL("/auth/auth-code-error", requestUrl.origin),
-  );
+  // return the user to an error page with instructions
+  return NextResponse.redirect(`${origin}/auth/auth-code-error`);
 }

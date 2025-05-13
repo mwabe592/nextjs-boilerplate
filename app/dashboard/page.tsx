@@ -3,7 +3,7 @@ import { createClient } from "@/utils/supabase/server";
 
 export default async function DashboardPage() {
   const cookieStore = cookies();
-  const supabase = await createClient(cookieStore);
+  const supabase = await createClient();
 
   const {
     data: { user },

@@ -1,3 +1,4 @@
+"use client";
 import { useEffect, useState } from "react";
 
 export default function ScrollToTop() {
@@ -28,14 +29,14 @@ export default function ScrollToTop() {
   }, []);
 
   return (
-    <div className="z-99 fixed bottom-8 right-8">
+    <div className="fixed right-8 bottom-8 z-99">
       {isVisible && (
         <div
           onClick={scrollToTop}
           aria-label="scroll to top"
-          className="hover:shadow-signUp rounded-xs bg-primary hover:bg-primary/80 flex h-10 w-10 cursor-pointer items-center justify-center text-white shadow-md transition duration-300 ease-in-out"
+          className="hover:shadow-signUp bg-primary hover:bg-primary/80 flex h-10 w-10 cursor-pointer items-center justify-center rounded-xs text-white shadow-md transition duration-300 ease-in-out"
         >
-          <span className="mt-[6px] h-3 w-3 rotate-45 border-l border-t border-white"></span>
+          <span className="mt-[6px] h-3 w-3 rotate-45 border-t border-l border-white"></span>
           <span className="sr-only">scroll to top</span>
         </div>
       )}

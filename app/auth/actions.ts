@@ -13,7 +13,7 @@ export async function signInWithEmail(
   formData: FormData,
 ): Promise<AuthState> {
   const cookieStore = cookies();
-  const supabase = await createClient(cookieStore);
+  const supabase = await createClient();
 
   // type-casting here for convenience
   // in practice, you should validate your inputs
@@ -35,13 +35,13 @@ export async function signInWithEmail(
 }
 
 export async function signInWithGoogle() {
-  const cookieStore = cookies();
-  const supabase = await createClient(cookieStore);
+  const supabase = await createClient();
 
   // Get the current origin for the callback URL
-  const protocol = process.env.NODE_ENV === "production" ? "https" : "http";
-  const host = process.env.NEXT_PUBLIC_SITE_URL || "localhost:3000";
-  const callbackUrl = `${protocol}://${host}/auth/callback`;
+
+  const callbackUrl = `${process.env.NEXT_PUBLIC_SITE_URL}/auth/callback`;
+
+  console.log(callbackUrl);
 
   const { data, error } = await supabase.auth.signInWithOAuth({
     provider: "google",
@@ -71,7 +71,7 @@ export async function signUp(
   formData: FormData,
 ): Promise<AuthState> {
   const cookieStore = cookies();
-  const supabase = await createClient(cookieStore);
+  const supabase = await createClient();
 
   const data = {
     email: formData.get("email") as string,
